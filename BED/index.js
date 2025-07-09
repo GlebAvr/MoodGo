@@ -91,13 +91,34 @@ async function searchSpotifyPlaylists(keyword) {
     headers: { 'Authorization': `Bearer ${token}` }
   });
 
-  return res.data.playlists.items.map(pl => ({
+  const items = (
+    res.data &&
+    res.data.playlists &&
+    Array.isArray(res.data.playlists.items)
+  ) ? res.data.playlists.items : [];
+
+  //console.log("Spotify API raw response:", JSON.stringify(res.data, null, 2));
+  //console.log("Items to map over:", items);
+  console.log(`Found ${items.length} playlists for keyword "${keyword}"`);
+
+  return items
+    .filter(pl => pl)
+    .map(pl => ({
     name: pl.name,
     url: pl.external_urls.spotify,
     id: pl.id,
     image: pl.images[0]?.url
   }));
 }
+
+async function searchSpotifyPlaylistsWithFallback(keywords) {
+  for (let keyword of keywords) {
+    const results = await searchSpotifyPlaylists(keyword);
+    if (results.length > 0) return results;
+  }
+  return []; // No playlists found for any keyword
+}
+
 
 app.get('/', (req, res) => {
     res.send('MoodGo BED is working and operational!');
@@ -109,7 +130,8 @@ app.post('/get-songs', async (req, res) => {
     
     let playlists = [];
     try {
-        playlists = await searchSpotifyPlaylists(keywords[0]);
+        playlists = await searchSpotifyPlaylistsWithFallback(keywords);
+
     } catch (error) {
         console.error('Spotify API error:', error.message);
     }
