@@ -1,16 +1,18 @@
 require('dotenv').config();
+
+const express = require('express');
+const cors = require('cors');
+
 const {OpenAI} = require('openai');
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(cors());
+app.use(express.json());
 
 // API call
 async function getOpenAIMoodKeywords(mood) {
@@ -52,13 +54,9 @@ async function getMoodKeywordsWithFallback(mood) {
     wonderful: ['love', 'slow', 'date'],
     // Add more moods as you like
   };
+  if (!fallback[mood]) console.warn('Unknown mood, using generic fallback:', mood);
   return fallback[mood] || ['playlist', 'music', 'mood'];
 }
-
-
-
-app.use(cors());
-app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
     res.send('MoodGo BED is working and operational!');
