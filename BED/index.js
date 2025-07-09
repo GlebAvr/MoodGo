@@ -46,6 +46,8 @@ async function getMoodKeywordsWithFallback(mood) {
   */
 
   // Mock/fallback keywords for each mood
+
+  const normalizedMood = mood.charAt(0).toUpperCase() + mood.slice(1).toLowerCase();
   const fallback = {
     Bad: ['party', 'upbeat', 'sunshine'],
     Sad: ['melancholy', 'breakup', 'acoustic'],
@@ -54,8 +56,8 @@ async function getMoodKeywordsWithFallback(mood) {
     Wonderful: ['love', 'slow', 'date']
     // Add more moods as you like
   };
-  if (!fallback[mood]) console.warn('Unknown mood, using generic fallback:', mood);
-  return fallback[mood] || ['playlist', 'music', 'mood'];
+  if (!fallback[normalizedMood]) console.warn('Unknown mood, using generic fallback:', mood);
+  return fallback[normalizedMood] || ['playlist', 'music', 'mood'];
 }
 
 const axios = require('axios');
