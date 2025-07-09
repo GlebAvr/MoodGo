@@ -58,6 +58,45 @@ async function getMoodKeywordsWithFallback(mood) {
   return fallback[mood] || ['playlist', 'music', 'mood'];
 }
 
+const axios = require('axios');
+
+let spotifyToken = null;
+let spotifyTokenExpires = 0;
+
+// Get (or refresh) Spotify access token
+async function getSpotifyAccessToken() {
+  if (spotifyToken && Date.now() < spotifyTokenExpires) return spotifyToken;
+
+  const clientId = process.env.SPOTIFY_CLIENT_ID;
+  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+  const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+
+  const res = await axios.post('https://accounts.spotify.com/api/token',
+    new URLSearchParams({ grant_type: 'client_credentials' }),
+    { headers: { 'Authorization': `Basic ${auth}`, 'Content-Type': 'application/x-www-form-urlencoded' } }
+  );
+
+  spotifyToken = res.data.access_token;
+  spotifyTokenExpires = Date.now() + (res.data.expires_in - 60) * 1000; // expires_in is in seconds
+  return spotifyToken;
+}
+
+// Search for playlists using a keyword
+async function searchSpotifyPlaylists(keyword) {
+  const token = await getSpotifyAccessToken();
+  const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(keyword)}&type=playlist&limit=5`;
+  const res = await axios.get(url, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+
+  return res.data.playlists.items.map(pl => ({
+    name: pl.name,
+    url: pl.external_urls.spotify,
+    id: pl.id,
+    image: pl.images[0]?.url
+  }));
+}
+
 app.get('/', (req, res) => {
     res.send('MoodGo BED is working and operational!');
 });
@@ -65,12 +104,19 @@ app.get('/', (req, res) => {
 app.post('/get-songs', async (req, res) => {
     const {mood} = req.body;
     const keywords = await getMoodKeywordsWithFallback(mood);
-    console.log(`Received mood: ${mood}`);
+    
+    let playlists = [];
+    try {
+        playlists = await searchSpotifyPlaylists(keywords[0]);
+    } catch (error {
+        console.error('Spotify API error:', error.message);
+    }
 
     res.json({
-        message: `AI keywords for mood: ${mood}`,
-        mood: mood,
-        ai_keywords: keywords
+        message: `Spotify playlists for mood: ${mood}`,
+        mood,
+        ai_keywords: keywords,
+        playlists
     });
 });
 
