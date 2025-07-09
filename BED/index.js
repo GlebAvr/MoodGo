@@ -108,7 +108,7 @@ app.post('/get-songs', async (req, res) => {
     let playlists = [];
     try {
         playlists = await searchSpotifyPlaylists(keywords[0]);
-    } catch (error {
+    } catch (error) {
         console.error('Spotify API error:', error.message);
     }
 
