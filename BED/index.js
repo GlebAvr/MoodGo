@@ -47,11 +47,11 @@ async function getMoodKeywordsWithFallback(mood) {
 
   // Mock/fallback keywords for each mood
   const fallback = {
-    bad: ['party', 'upbeat', 'sunshine'],
-    sad: ['melancholy', 'breakup', 'acoustic'],
-    soso: ['workout', 'power', 'dance'],
-    good: ['relax', 'lofi', 'chillout'],
-    wonderful: ['love', 'slow', 'date'],
+    Bad: ['party', 'upbeat', 'sunshine'],
+    Sad: ['melancholy', 'breakup', 'acoustic'],
+    Normal: ['workout', 'power', 'dance'],
+    Good: ['relax', 'lofi', 'chillout'],
+    Wonderful: ['love', 'slow', 'date']
     // Add more moods as you like
   };
   if (!fallback[mood]) console.warn('Unknown mood, using generic fallback:', mood);
