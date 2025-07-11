@@ -53,8 +53,8 @@ async function getMoodKeywordsWithFallback(mood) {
     Sad: ['melancholy', 'breakup', 'acoustic'],
     Normal: ['workout', 'power', 'dance'],
     Good: ['relax', 'lofi', 'chillout'],
-    Wonderful: ['love', 'slow', 'date']
-    // Add more moods as you like
+    Wonderful: ['love', 'slow', 'date'],
+    Energetic: ['workout, power']
   };
   if (!fallback[normalizedMood]) console.warn('Unknown mood, using generic fallback:', mood);
   return fallback[normalizedMood] || ['playlist', 'music', 'mood'];
@@ -119,6 +119,18 @@ async function searchSpotifyPlaylistsWithFallback(keywords) {
   return []; // No playlists found for any keyword
 }
 
+function getAmazonMusicLinks(keywords) {
+  return keywords.map(keyword =>
+    `https://music.amazon.com/search/${encodeURIComponent(keyword)}`
+  );
+}
+
+function getAppleMusicLinks(keywords) {
+  return keywords.map(keyword =>
+    `https://music.apple.com/us/search?term=${encodeURIComponent(keyword)}`
+  );
+}
+
 
 app.get('/', (req, res) => {
     res.send('MoodGo BED is working and operational!');
@@ -134,13 +146,18 @@ app.post('/get-songs', async (req, res) => {
 
     } catch (error) {
         console.error('Spotify API error:', error.message);
-    }
+    };
+
+    const amazonMusicLinks = getAmazonMusicLinks(keywords);
+    const appleMusicLinks = getAppleMusicLinks(keywords);
 
     res.json({
-        message: `Spotify playlists for mood: ${mood}`,
+        message: `Music playlists and links for mood: ${mood} (Spotify, Amazong Music, Apple Music)`,
         mood,
         ai_keywords: keywords,
-        playlists
+        spotify: playlists,
+        amazon: amazonMusicLinks,
+        apple: appleMusicLinks
     });
 });
 
