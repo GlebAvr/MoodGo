@@ -54,7 +54,7 @@ async function getMoodKeywordsWithFallback(mood) {
     Normal: ['workout', 'power', 'dance'],
     Good: ['relax', 'lofi', 'chillout'],
     Wonderful: ['love', 'slow', 'date'],
-    Energetic: ['workout, power']
+    Energetic: ['workout', 'power']
   };
   if (!fallback[normalizedMood]) console.warn('Unknown mood, using generic fallback:', mood);
   return fallback[normalizedMood] || ['playlist', 'music', 'mood'];
