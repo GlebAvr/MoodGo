@@ -129,38 +129,52 @@ app.get('/', (req, res) => {
 });
 
 app.post('/get-songs', async (req, res) => {
-    const { mood, genres } = req.body;
+    const { mood, genres, platforms } = req.body;
     const keywords = await getMoodKeywordsWithFallback(mood);
 
     const searchTerms = (genres && genres.length > 0)
         ? keywords.flatMap(keyword => genres.map(genre => `${keyword} ${genre}`))
         : keywords;
 
-    let playlists = [];
-    try {
-        playlists = await searchSpotifyPlaylistsWithTerms(searchTerms);
+    const selectedPlatforms = Array.isArray(platforms) && platforms.length
+    ? platforms.map(p => p.toLowerCase())
+    : ['spotify', 'amazon', 'apple'];
 
-    } catch (error) {
-        console.error('Spotify API error:', error.message);
+    let spotifyResults = [];
+    let amazonResults = [];
+    let appleResults = [];
+
+    if (selectedPlatforms.includes('spotify')) {
+        try {
+            spotifyResults = await searchSpotifyPlaylistsWithTerms(searchTerms);
+        } catch (error) {
+            console.error('Spotify API error:', error.message);
+        }
     };
 
-    const amazonMusicLinks = getAmazonMusicLinks(searchTerms);
-    const appleMusicLinks = getAppleMusicLinks(searchTerms);
-    const spotifyLimits = 5;
-    const amazonLimits = 5;
-    const appleLimits = 5;
+    if (selectedPlatforms.includes('amazon')) {
+        amazonResults = getAmazonMusicLinks(searchTerms);
+    };
+
+    if (selectedPlatforms.includes('apple')) {
+        appleResults =getAppleMusicLinks(searchTerms);
+    };
 
     res.json({
-        message: `Music playlists and links for mood: ${mood}${genres && genres.length ? ' and genres: ' + genres.join(', ') : ''} (Spotify, Amazon Music, Apple Music)`,
+        message: `Music playlists and links for mood: ${mood}${genres && genres.length ? ' and genres: ' + genres.join(', ') : ''} on platforms: ${selectedPlatforms.join(', ')}`,
         mood,
         genres,
+        platforms: selectedPlatforms,
         ai_keywords: keywords,
-        spotify: playlists.slice(0, spotifyLimits),
-        amazon: amazonMusicLinks.slice(0, amazonLimits),
-        apple: appleMusicLinks.slice(0, appleLimits)
+        ...(selectedPlatforms.includes('spotify') && {spotify: spotifyResults.slice(0,5)}),
+        ...(selectedPlatforms.includes('amazon') && {amazon: amazonResults.slice(0,5)}),
+        ...(selectedPlatforms.includes('apple') && {apple: appleResults.slice(0,5)}),
     });
 });
 
 app.listen(PORT, () => {
     console.log(`Server is operational on port: ${PORT}`);
 });
+
+// © 2025 MoodGo Mobile App / Maksim Shur. All rights reserved.
+// For internal use only. Unauthorized use or distribution is prohibited.
