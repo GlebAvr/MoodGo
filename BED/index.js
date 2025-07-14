@@ -15,6 +15,14 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+function checkApiKey(req, res, next) {
+    const key = req.headers['x-api-key'];
+    if (!key || key !== process.env.MOODGO_API_KEY) {
+        return res.status(401).json({error: 'Unauthorised.'});
+    }
+    next();
+};
+
 // API call
 async function getOpenAIMoodKeywords(mood) {
     try {
@@ -32,7 +40,7 @@ async function getOpenAIMoodKeywords(mood) {
         console.error("OpenAI API error:", error.message);
         return [];
     }
-}
+};
 
 async function getMoodKeywordsWithFallback(mood) {
     const normalizedMood = mood.charAt(0).toUpperCase() + mood.slice(1).toLowerCase();
@@ -46,7 +54,7 @@ async function getMoodKeywordsWithFallback(mood) {
     };
     if (!fallback[normalizedMood]) console.warn('Unknown mood, using generic fallback:', mood);
     return fallback[normalizedMood] || ['playlist', 'music', 'mood'];
-}
+};
 
 let spotifyToken = null;
 let spotifyTokenExpires = 0;
@@ -67,7 +75,7 @@ async function getSpotifyAccessToken() {
     spotifyToken = res.data.access_token;
     spotifyTokenExpires = Date.now() + (res.data.expires_in - 60) * 1000; // expires_in is in seconds
     return spotifyToken;
-}
+};
 
 // Search for playlists using a keyword
 async function searchSpotifyPlaylists(keyword) {
@@ -93,7 +101,7 @@ async function searchSpotifyPlaylists(keyword) {
             id: pl.id,
             image: pl.images[0]?.url
         }));
-}
+};
 
 // NEW: Search for playlists using multiple terms
 async function searchSpotifyPlaylistsWithTerms(terms) {
@@ -110,25 +118,25 @@ async function searchSpotifyPlaylistsWithTerms(terms) {
         seen.add(pl.id);
         return true;
     });
-}
+};
 
 function getAmazonMusicLinks(keywords) {
     return keywords.map(keyword =>
         `https://music.amazon.com/search/${encodeURIComponent(keyword)}`
     );
-}
+};
 
 function getAppleMusicLinks(keywords) {
     return keywords.map(keyword =>
         `https://music.apple.com/us/search?term=${encodeURIComponent(keyword)}`
     );
-}
+};
 
 app.get('/', (req, res) => {
     res.send('MoodGo BED is working and operational!');
 });
 
-app.post('/get-songs', async (req, res) => {
+app.post('/get-songs', checkApiKey, async (req, res) => {
     const { mood, genres, platforms } = req.body;
     const keywords = await getMoodKeywordsWithFallback(mood);
 
