@@ -6,9 +6,9 @@ This project and its contents are intended for internal use only and may not be 
 
 ## 🙌 Contributors
 
+- Gleb Avrorin, Maksim Shur – Designs and Idea
 - Maksim Shur – Backend / API Developer  
 - Gleb Avrorin – iOS / Android Mobile Developer  
-- Gleb Avrorin, Maksim Shur – Designs and Idea
 
 Thanks to everyone involved in building *MoodGo Mobile App*! 🚀
 
