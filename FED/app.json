@@ -1,19 +1,24 @@
 {
   "expo": {
-    "name": "FED",
-    "slug": "FED",
-    "version": "1.0.0",
+    "name": "MoodGo",
+    "slug": "MoodGo",
+    "version": "0.0.1 (Alpha)",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/icon2.png",
     "scheme": "fed",
     "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/images/mood-go-splash2.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#bae6fd"
+    },
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/icon2.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true
@@ -25,18 +30,11 @@
     },
     "plugins": [
       "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
-        }
-      ]
+      "expo-font"
     ],
-    "experiments": {
-      "typedRoutes": true
-    }
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "experiments": {}
   }
 }
